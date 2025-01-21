@@ -29,6 +29,7 @@ class hitbox {
     }
     isHit(vect, O) {
         let dis = calculateDistance(this.#position, vect, O);
+        console.log(dis);
         return dis < this.#r && dis >= 0;
     }
 };
