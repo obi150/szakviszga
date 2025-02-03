@@ -3,37 +3,6 @@ let angleX = 0, angleY = 0;
 let speed = 5;
 let clickStartX, clickStartY;
 
-class hitbox {
-    #r;
-    #position;
-    #color;
-    constructor(r, position) {
-        this.#r = r;
-        this.#position = position;
-        this.#color = [255, 0, 0];
-    }
-    changePosition(x, y, z) {
-        this.#position = [x, y, z];
-    }
-    changeColor(color) {
-        this.#color = color;
-    }
-    getPosition() {
-        return this.#position;
-    }
-    getRadius() {
-        return this.#r;
-    }
-    getColor() {
-        return this.#color;
-    }
-    isHit(vect, O) {
-        let dis = calculateDistance(this.#position, vect, O);
-        console.log(dis);
-        return dis < this.#r && dis >= 0;
-    }
-};
-
 let cir = new hitbox(100, [0, 0, -200])
 
 function calculateDistance(A, vect, O) {
@@ -45,10 +14,49 @@ function calculateDistance(A, vect, O) {
     return Math.sqrt((P[0] - A[0]) * (P[0] - A[0]) + (P[1] - A[1]) * (P[1] - A[1]) + (P[2] - A[2]) * (P[2] - A[2]));
 }
 
+function createRay() {
+    let ndcX = (mouseX / width) * 2 - 1;
+    let ndcY = (mouseY / height) * 2 - 1;
+
+    let forward = [
+        Math.cos(angleY) * Math.sin(angleX),
+        Math.sin(angleY),
+        Math.cos(angleY) * Math.cos(angleX)
+    ];
+    let right = [
+        -Math.cos(angleX),
+        0,
+        Math.sin(angleX)
+    ];
+    let up = [
+        -Math.sin(angleY) * Math.sin(angleX),
+        Math.cos(angleY),
+        -Math.sin(angleY) * Math.cos(angleX)
+    ];
+
+    let fov = PI / 3, aspect = width / height;
+    let nearPlaneX = ndcX * Math.tan(fov / 2) * aspect;
+    let nearPlaneY = ndcY * Math.tan(fov / 2);
+
+    return normalize([
+        nearPlaneX * right[0] + nearPlaneY * up[0] + forward[0],
+        nearPlaneX * right[1] + nearPlaneY * up[1] + forward[1],
+        nearPlaneX * right[2] + nearPlaneY * up[2] + forward[2]
+    ]);
+}
+
+function normalize(vec) {
+    let magnitude = Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
+    if (magnitude === 0) return [0, 0, 0];
+    return [vec[0] / magnitude, vec[1] / magnitude, vec[2] / magnitude];
+}
+
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL);
 
     perspective(PI / 3, width / height, 0.1, 1000);
+
+    setUpChessBoard();
 }
 
 function draw() {
@@ -57,14 +65,12 @@ function draw() {
     angleY = constrain(angleY, -PI / 2, PI / 2);
 
     if (keyIsDown(UP_ARROW)) {
-        camX += sin(angleX) * cos(angleY) * speed;
-        camY += sin(angleY) * speed;
-        camZ += cos(angleX) * cos(angleY) * speed;
+        camX += sin(angleX) * speed;
+        camZ += cos(angleX) * speed;
     }
     if (keyIsDown(DOWN_ARROW)) {
-        camX -= sin(angleX) * cos(angleY) * speed;
-        camY -= sin(angleY) * speed;
-        camZ -= cos(angleX) * cos(angleY) * speed;
+        camX -= sin(angleX) * speed;
+        camZ -= cos(angleX) * speed;
     }
     if (keyIsDown(LEFT_ARROW)) {
         camX += cos(angleX) * speed;
@@ -74,6 +80,11 @@ function draw() {
         camX -= cos(angleX) * speed;
         camZ += sin(angleX) * speed;
     }
+    if (keyIsDown(32))
+        camY -= speed;
+    if (keyIsDown(16))
+        camY += speed;
+
 
     camera(camX, camY, camZ, camX + sin(angleX) * cos(angleY), camY + sin(angleY), camZ + cos(angleX) * cos(angleY), 0, 1, 0);
 
@@ -95,9 +106,7 @@ function mousePressed() {
 }
 function mouseReleased() {
     if (clickStartX == mouseX && clickStartY == mouseY) {
-        let clickAngleX = angleX - (2 * mouseX / windowWidth - 1) * PI / 3;
-        let clickAngleY = angleY + windowHeight / windowWidth * (2 * mouseY / windowHeight - 1) * PI / 3;
-        let vect = [sin(clickAngleX) * cos(clickAngleY), sin(clickAngleY), cos(clickAngleX) * cos(clickAngleY)]
+        let vect = createRay();
         if (cir.isHit(vect, [camX, camY, camZ])) {
             cir.changeColor([0, 255, 0]);
         }
