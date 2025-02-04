@@ -65,67 +65,42 @@ function createMoveOprionsHitboxesByID(id, pos) {
     let moveOptions = new Array;
     switch (id) {
         case 1:
-            moveOptions = moveID1(pos);
+        case 7:
+            moveOptions = movePawn(id == 1, pos);
             break;
         case 2:
-            moveOptions = moveID2(pos);
+        case 8:
+            moveOptions = moveKnight(id == 2, pos);
             break;
         case 3:
-            moveOptions = moveID3(pos);
+        case 9:
+            moveOptions = moveBishop(id == 3, pos);
             break;
         case 4:
-            moveOptions = moveID4(pos);
+        case 10:
+            moveOptions = moveRook(id == 4, pos);
             break;
         case 5:
-            moveOptions = moveID5(pos);
+        case 11:
+            moveOptions = moveQueen(id == 5, pos);
             break;
         case 6:
-            moveOptions = moveID6(pos);
-            break;
-        case 7:
-            moveOptions = moveID7(pos);
-            break;
-        case 8:
-            moveOptions = moveID1(pos);
-            break;
-        case 1:
-            moveOptions = moveID1(pos);
-            break;
-        case 1:
-            moveOptions = moveID1(pos);
-            break;
-        case 1:
-            moveOptions = moveID1(pos);
-            break;
-        case 1:
-            moveOptions = moveID1(pos);
+        case 12:
+            moveOptions = moveKing(id == 6, pos);
             break;
     }
     return moveOptions;
 }
 
-function moveID1(pos) {
+function movePawn(white, pos) {
     let hitboxes = new Array;
-    if (chessBoard3D[pos[1] + 1][pos[2] + 1][pos[3] + 1] == 0)
-        hitboxes.push(new hitbox(25, [pos[1] + 1, pos[2] + 1, pos[3] + 1]));
-    if (chessBoard3D[pos[1] + 1][pos[2] + 1][pos[3]] > 6)
-        hitboxes.push(new hitbox(25, [pos[1] + 1, pos[2] + 1, pos[3]]));
-    if (chessBoard3D[pos[1] + 1][pos[2]][pos[3] + 1] > 6)
-        hitboxes.push(new hitbox(25, [pos[1] + 1, pos[2], pos[3] + 1]));
-    if (chessBoard3D[pos[1]][pos[2] + 1][pos[3] + 1] > 6)
-        hitboxes.push(new hitbox(25, [pos[1], pos[2] + 1, pos[3] + 1]));
-    return hitboxes;
-}
-
-function moveID7(pos) {
-    let hitboxes = new Array;
-    if (chessBoard3D[pos[1] - 1][pos[2] - 1][pos[3] - 1] == 0)
-        hitboxes.push(new hitbox(25, [pos[1] - 1, pos[2] - 1, pos[3] - 1]));
-    if (chessBoard3D[pos[1] - 1][pos[2] - 1][pos[3]] < 7 && chessBoard3D[pos[1] - 1][pos[2] - 1][pos[3]] > 0)
-        hitboxes.push(new hitbox(25, [pos[1] - 1, pos[2] - 1, pos[3]]));
-    if (chessBoard3D[pos[1] - 1][pos[2]][pos[3] - 1] < 7 && chessBoard3D[pos[1] - 1][pos[2]][pos[3] - 1] > 0)
-        hitboxes.push(new hitbox(25, [pos[1] - 1, pos[2], pos[3] - 1]));
-    if (chessBoard3D[pos[1]][pos[2] - 1][pos[3] - 1] < 7 && chessBoard3D[pos[1]][pos[2] - 1][pos[3] - 1] > 0)
-        hitboxes.push(new hitbox(25, [pos[1], pos[2] - 1, pos[3] - 1]));
+    if (chessBoard3D[pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white][pos[3] - 1 + 2 * white] == 0)
+        hitboxes.push(new hitbox(25, [pos[1] - 1 + 2 * white, pos[2] - 1 + 2 * white, pos[3] - 1 + 2 * white]));
+    if (chessBoard3D[pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white][pos[3]] < (7 + 6 * white) && chessBoard3D[pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white][pos[3]] > (0 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[1] - 1 + 2 * white, pos[2] - 1 + 2 * white, pos[3]]));
+    if (chessBoard3D[pos[1] - 1 + 2 * white][pos[2]][pos[3] - 1 + 2 * white] < (7 + 6 * white) && chessBoard3D[pos[1] - 1 + 2 * white][pos[2]][pos[3] - 1 + 2 * white] > (0 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[1] - 1 + 2 * white, pos[2], pos[3] - 1 + 2 * white]));
+    if (chessBoard3D[pos[1]][pos[2] - 1 + 2 * white][pos[3] - 1 + 2 * white] < (7 + 6 * white) && chessBoard3D[pos[1]][pos[2] - 1 + 2 * white][pos[3] - 1 + 2 * white] > (0 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[1], pos[2] - 1 + 2 * white, pos[3] - 1 + 2 * white]));
     return hitboxes;
 }
