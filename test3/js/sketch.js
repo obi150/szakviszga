@@ -60,19 +60,19 @@ function draw() {
 
     angleY = constrain(angleY, -PI / 2, PI / 2);
 
-    if (keyIsDown(UP_ARROW)) {
+    if (keyIsDown(87)) {
         camX += sin(angleX) * speed;
         camZ += cos(angleX) * speed;
     }
-    if (keyIsDown(DOWN_ARROW)) {
+    if (keyIsDown(83)) {
         camX -= sin(angleX) * speed;
         camZ -= cos(angleX) * speed;
     }
-    if (keyIsDown(LEFT_ARROW)) {
+    if (keyIsDown(65)) {
         camX += cos(angleX) * speed;
         camZ -= sin(angleX) * speed;
     }
-    if (keyIsDown(RIGHT_ARROW)) {
+    if (keyIsDown(68)) {
         camX -= cos(angleX) * speed;
         camZ += sin(angleX) * speed;
     }
@@ -127,9 +127,9 @@ function mouseReleased() {
         let hitboxDistanceIndex = -1, hitboxDistance = 999999;
         for (let i = 0; i < pieces.length; i++) {
             if (pieces[i].isHit(vect, [camX, camY, camZ])) {
-                let newDis = Math.sqrt((pieces[i].getPosition()[0] - camX) * (pieces[i].getPosition()[0] - camX) +
-                    (pieces[i].getPosition()[1] - camY) * (pieces[i].getPosition()[1] - camY) +
-                    (pieces[i].getPosition()[2] - camZ) * (pieces[i].getPosition()[2] - camZ));
+                let newDis = Math.sqrt((xToCoord(pieces[i].getPosition()[0]) - camX) * (xToCoord(pieces[i].getPosition()[0]) - camX) +
+                    (xToCoord(pieces[i].getPosition()[1]) - camY) * (xToCoord(pieces[i].getPosition()[1]) - camY) +
+                    (xToCoord(pieces[i].getPosition()[2]) - camZ) * (xToCoord(pieces[i].getPosition()[2]) - camZ));
                 if (newDis < pieceDistance) {
                     pieceDistance = newDis;
                     pieceDistanceIndex = i;
@@ -138,31 +138,31 @@ function mouseReleased() {
         }
         for (let i = 0; i < hitboxes.length; i++) {
             if (hitboxes[i].isHit(vect, [camX, camY, camZ])) {
-                let newDis = Math.sqrt(hitboxes[i].getPosition()[0] * hitboxes[i].getPosition()[0] + hitboxes[i].getPosition()[1] * hitboxes[i].getPosition()[1] + hitboxes[i].getPosition()[2] * hitboxes[i].getPosition()[2]);
+                let newDis = Math.sqrt((xToCoord(hitboxes[i].getPosition()[0]) - camX) * (xToCoord(hitboxes[i].getPosition()[0]) - camX) +
+                    (xToCoord(hitboxes[i].getPosition()[1]) - camY) * (xToCoord(hitboxes[i].getPosition()[1]) - camY) +
+                    (xToCoord(hitboxes[i].getPosition()[2]) - camZ) * (xToCoord(hitboxes[i].getPosition()[2]) - camZ));
                 if (newDis < hitboxDistance) {
                     hitboxDistance = newDis;
                     hitboxDistanceIndex = i;
                 }
             }
         }
-        console.log(pieceDistance, hitboxDistance);
-        if (pieceDistanceIndex > -1) {
-            if (hitboxDistanceIndex > -1) {
+        if (hitboxDistanceIndex > -1) {
+            if (pieceDistanceIndex > -1) {
                 if (pieceDistance < hitboxDistance) {
                     currentPieceIndex = pieceDistanceIndex;
                     createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
                 }
-                else {
+                else
                     createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
-                }
             }
-            else {
-                currentPieceIndex = pieceDistanceIndex;
-                createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
-            }
+            else 
+                createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
 
         }
-        else if (hitboxDistanceIndex > -1)
-            createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
+        else if (pieceDistanceIndex > -1){
+            currentPieceIndex = pieceDistanceIndex;
+            createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
+        }
     }
 }

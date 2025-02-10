@@ -33,16 +33,18 @@ class hitbox {
     getId() {
         return this.#id;
     }
+    getOldId() {
+        return this.#oldId;
+    }
     isHit(vect, O) {
         let dis = calculateDistance(boardPositionToCoord(this.#position), vect, O);
-        console.log(dis);
         return dis < this.#r && dis >= 0;
     }
 };
 
 setUpChessBoard();
 
-let pieces = [new hitbox(25, [3, 3, 3], 1), new hitbox(25, [9, 9, 9], 2), new hitbox(25, [4, 4, 3], 1)];
+let pieces = [new hitbox(25, [3, 3, 3], 1), new hitbox(25, [9, 9, 9], 2), new hitbox(25, [4, 4, 3], 7), new hitbox(25, [8, 5, 6], 3)];
 
 let currentPieceIndex = 0;
 
@@ -65,6 +67,9 @@ let currentPieceIndex = 0;
 
 function boardPositionToCoord(pos) {
     return [200 - 50 * (pos[0] - 2), 200 - 50 * (pos[1] - 2), 200 - 50 * (pos[2] - 2)];
+}
+function xToCoord(x) {
+    return 200 - 50 * (x - 2);
 }
 
 function setUpChessBoard() {
@@ -128,6 +133,7 @@ function take(pos) {
     if (pieceIndex != -1) {
         pieces[pieceIndex].destroy();
         pieces.splice(pieceIndex, 1);
+        currentPieceIndex--;
     }
 }
 
@@ -228,4 +234,69 @@ function moveKnight(white, pos) {
     if (chessBoard3D[pos[0]][pos[1] - 1][pos[2] - 2] == 0 || (chessBoard3D[pos[0]][pos[1] - 1][pos[2] - 2] > (6 * white) && chessBoard3D[pos[0]][pos[1] - 1][pos[2] - 2] < (7 + 6 * white)))
         hitboxes.push(new hitbox(25, [pos[0], pos[1] - 1, pos[2] - 2], 13,
             chessBoard3D[pos[0]][pos[1] - 1][pos[2] - 2]));
+}
+
+function moveBishop(white, pos) {
+    hitboxes.forEach(hitbox => hitbox.destroy());
+    hitboxes = [];
+    let i = 1;
+    for(i; !chessBoard3D[pos[0] + i][pos[1] + i][pos[2]]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1] + i, pos[2]], 13, chessBoard3D[pos[0] + i][pos[1] + i][pos[2]]))
+    if(chessBoard3D[pos[0] + i][pos[1] + i][pos[2]] > (6 * white) && chessBoard3D[pos[0] + i][pos[1] + i][pos[2]] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1] + i, pos[2]], 13, chessBoard3D[pos[0] + i][pos[1] + i][pos[2]]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] + i][pos[1] - i][pos[2]]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1] - i, pos[2]], 13, chessBoard3D[pos[0] + i][pos[1] - i][pos[2]]))
+    if(chessBoard3D[pos[0] + i][pos[1] - i][pos[2]] > (6 * white) && chessBoard3D[pos[0] + i][pos[1] - i][pos[2]] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1] - i, pos[2]], 13, chessBoard3D[pos[0] + i][pos[1] - i][pos[2]]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] - i][pos[1] + i][pos[2]]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1] + i, pos[2]], 13, chessBoard3D[pos[0] - i][pos[1] + i][pos[2]]))
+    if(chessBoard3D[pos[0] - i][pos[1] + i][pos[2]] > (6 * white) && chessBoard3D[pos[0] - i][pos[1] + i][pos[2]] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1] + i, pos[2]], 13, chessBoard3D[pos[0] - i][pos[1] + i][pos[2]]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] - i][pos[1] - i][pos[2]]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1] - i, pos[2]], 13, chessBoard3D[pos[0] - i][pos[1] - i][pos[2]]))
+    if(chessBoard3D[pos[0] - i][pos[1] - i][pos[2]] > (6 * white) && chessBoard3D[pos[0] - i][pos[1] - i][pos[2]] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1] - i, pos[2]], 13, chessBoard3D[pos[0] - i][pos[1] - i][pos[2]]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] + i][pos[1]][pos[2] + i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1], pos[2] + i], 13, chessBoard3D[pos[0] + i][pos[1]][pos[2] + i]))
+    if(chessBoard3D[pos[0] + i][pos[1]][pos[2] + i] > (6 * white) && chessBoard3D[pos[0] + i][pos[1]][pos[2] + i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1], pos[2] + i], 13, chessBoard3D[pos[0] + i][pos[1]][pos[2] + i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] + i][pos[1]][pos[2] - i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1], pos[2] - i], 13, chessBoard3D[pos[0] + i][pos[1]][pos[2] - i]))
+    if(chessBoard3D[pos[0] + i][pos[1]][pos[2] - i] > (6 * white) && chessBoard3D[pos[0] + i][pos[1]][pos[2] - i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] + i, pos[1], pos[2] - i], 13, chessBoard3D[pos[0] + i][pos[1]][pos[2] - i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] - i][pos[1]][pos[2] + i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1], pos[2] + i], 13, chessBoard3D[pos[0] - i][pos[1]][pos[2] + i]))
+    if(chessBoard3D[pos[0] - i][pos[1]][pos[2] + i] > (6 * white) && chessBoard3D[pos[0] - i][pos[1]][pos[2] + i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1], pos[2] + i], 13, chessBoard3D[pos[0] - i][pos[1]][pos[2] + i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0] - i][pos[1]][pos[2] - i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1], pos[2] - i], 13, chessBoard3D[pos[0] - i][pos[1]][pos[2] - i]))
+    if(chessBoard3D[pos[0] - i][pos[1]][pos[2] - i] > (6 * white) && chessBoard3D[pos[0] - i][pos[1]][pos[2] - i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0] - i, pos[1], pos[2] - i], 13, chessBoard3D[pos[0] - i][pos[1]][pos[2] - i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0]][pos[1] + i][pos[2] + i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] + i, pos[2] + i], 13, chessBoard3D[pos[0]][pos[1] + i][pos[2] + i]))
+    if(chessBoard3D[pos[0]][pos[1] + i][pos[2] + i] > (6 * white) && chessBoard3D[pos[0]][pos[1] + i][pos[2] + i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] + i, pos[2] + i], 13, chessBoard3D[pos[0]][pos[1] + i][pos[2] + i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0]][pos[1] + i][pos[2] - i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] + i, pos[2] - i], 13, chessBoard3D[pos[0]][pos[1] + i][pos[2] - i]))
+    if(chessBoard3D[pos[0]][pos[1] + i][pos[2] - i] > (6 * white) && chessBoard3D[pos[0]][pos[1] + i][pos[2] - i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] + i, pos[2] - i], 13, chessBoard3D[pos[0]][pos[1] + i][pos[2] - i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0]][pos[1] - i][pos[2] + i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] - i, pos[2] + i], 13, chessBoard3D[pos[0]][pos[1] - i][pos[2] + i]))
+    if(chessBoard3D[pos[0]][pos[1] - i][pos[2] + i] > (6 * white) && chessBoard3D[pos[0]][pos[1] - i][pos[2] + i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] - i, pos[2] + i], 13, chessBoard3D[pos[0]][pos[1] - i][pos[2] + i]))
+    i = 1;
+    for(i; !chessBoard3D[pos[0]][pos[1] - i][pos[2] - i]; i++)
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] - i, pos[2] - i], 13, chessBoard3D[pos[0]][pos[1] - i][pos[2] - i]))
+    if(chessBoard3D[pos[0]][pos[1] - i][pos[2] - i] > (6 * white) && chessBoard3D[pos[0]][pos[1] - i][pos[2] - i] < (7 + 6 * white))
+        hitboxes.push(new hitbox(25, [pos[0], pos[1] - i, pos[2] - i], 13, chessBoard3D[pos[0]][pos[1] - i][pos[2] - i]))
 }
