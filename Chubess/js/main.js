@@ -1,4 +1,4 @@
-let camX = 0, camY = 0, camZ = 0;
+let camX = 25, camY = 25, camZ = -800;
 let angleX = 0, angleY = 0;
 let speed = 5;
 let clickStartX, clickStartY;
@@ -34,6 +34,7 @@ function draw() {
         camY -= speed;
     if (keyIsDown(16))
         camY += speed;
+    
 
 
     camera(camX, camY, camZ, camX + sin(angleX) * cos(angleY), camY + sin(angleY), camZ + cos(angleX) * cos(angleY), 0, 1, 0);
