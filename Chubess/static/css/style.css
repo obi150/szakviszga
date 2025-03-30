@@ -31,22 +31,27 @@ body, html {
     }
 
 .content {
-    position: fixed; /* Keeps it centered even on scroll */
+    position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Centers horizontally & vertically */
-    z-index: 10; /* Ensures buttons are above canvas */
+    transform: translate(-50%, -50%);
+    z-index: 10;
 }
 
 .pause {
     position: fixed;
     left: 100%;
     transform: translate(-110%,0%);
-    z-index: 10; /* Ensures buttons are above canvas */
+    z-index: 10;
+}
+
+.waiting {
+    position: fixed;
+    background-color: white;
 }
 
 button {
-    all: unset; /* Removes default button styles (padding, border, background, etc.) */
+    all: unset;
     display: block;
     width: 200px;
     height: 50px;
@@ -87,7 +92,7 @@ button {
         content: "";
         width: 100%;
         height: 100%;
-        background: #f5b041;
+        background: #1b1b1b; /*#f5b041*/
         bottom: 100%;
         position: absolute;
         transform-origin: center bottom 0px;

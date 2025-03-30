@@ -10,16 +10,5 @@
     <h1>Waiting Room</h1>
     <p>Waiting for another player...</p>
 
-    <script>
-        const socket = io();
-
-        // Join the waiting room
-        socket.emit('join_waiting_room');
-
-        // Redirect to game when paired
-        socket.on('redirect_to_game', (data) => {
-            window.location.href = data.url;
-        });
-    </script>
 </body>
 </html>

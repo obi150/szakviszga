@@ -50,6 +50,9 @@ class hitbox {
         let dis = calculateRayPointDistance(boardPositionToCoord(this.#position), vect, O);
         return dis < this.#r && dis >= 0;
     }
+    isWhite() {
+        return this.#id < 7;
+    }
 };
 /*IDs on the board
  * nothing:      0
@@ -69,9 +72,11 @@ class hitbox {
  * hitbox:      13*/
 
 setUpChessBoard();
-let pieces = [new hitbox(25, [3, 3, 3], 1), new hitbox(25, [9, 9, 9], 2), new hitbox(25, [4, 4, 3], 7), new hitbox(25, [8, 5, 6], 3),
-    new hitbox(25, [4, 4, 5], 10), new hitbox(25, [6, 7, 2], 11), new hitbox(25, [9, 2, 2], 6)];
+let pieces = [new hitbox(25, [9, 9, 9], 6), new hitbox(25, [9, 2, 9], 12), new hitbox(25, [4, 4, 3], 4), new hitbox(25, [9, 3, 2], 4),
+    new hitbox(25, [9, 3, 3], 4), new hitbox(25, [9, 2, 3], 4)];
 let hitboxes = [];
+
+kingIndex = findKingIndex();
 
 let currentPieceIndex = 0;
 
@@ -171,6 +176,20 @@ function setUpChessBoard() {
     }
 }
 
+function findKingIndex(white = isWhite) {
+    for (let i = 0; i < pieces.length; i++) {
+        if (pieces[i].getId() == 12 - 6 * white)
+            return i;
+    }
+    return -1;
+}
+
+function move(pieceId, hitboxId) {
+    currentPieceIndex = pieceId
+    createMoveOprionsHitboxesByID(pieces[pieceId].getId(), pieces[pieceId].getPosition())
+    createMoveOprionsHitboxesByID(hitboxes[hitboxId].getId(), hitboxes[hitboxId].getPosition())
+}
+
 function createMoveOprionsHitboxesByID(id, pos) {
     switch (id) {
         case 1:
@@ -224,7 +243,10 @@ function take(pos) {
     if (pieceIndex != -1) {
         pieces[pieceIndex].destroy();
         pieces.splice(pieceIndex, 1);
-        currentPieceIndex--;
+        if (pieceIndex < currentPieceIndex)
+            currentPieceIndex--;
+        if (pieceIndex < kingIndex)
+            kingIndex--;
     }
 }
 
@@ -476,7 +498,6 @@ function moveRook(white, pos) {
 }
 
 function moveKing(white, pos) {
-    console.log("in");
     let newHitboxes = [];
     allTakeHitboxes(white);
     for (let i = -1; i < 2; i++)
@@ -495,4 +516,26 @@ function noRestrictionKingMove(pos) {
         for (let j = -1; j < 2; j++)
             for (let k = -1; k < 2; k++)
                 hitboxes.push(new hitbox(HS, [pos[0] + i, pos[1] + j, pos[2] + k], 13, chessBoard3D[pos[0] + i][pos[1] + j][pos[2] + k]));
+}
+
+function isCheck(pos, white = isWhite) {
+    if (chessBoard3D[pos[0]][pos[1]][pos[2]] == 12 - 6 * white) {
+        allTakeHitboxes(white);
+        if (isTakeable(pos)) {
+            killAllHitboxes();
+            return true;
+        }
+        killAllHitboxes();
+    }
+    return false;
+}
+
+function isCheckmate(pos, white = isWhite) {
+    if (isCheck(pos, white) && chessBoard3D[pos[0]][pos[1]][pos[2]] == 12 - 6 * white) {
+        moveKing(white, pos);
+        if (hitboxes.lenght == 0)
+            return true;
+        killAllHitboxes();
+    }
+    return false;
 }

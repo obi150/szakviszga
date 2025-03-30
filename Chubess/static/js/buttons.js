@@ -18,10 +18,6 @@ $(document).ready(function () {
         $("#button-pause .boton").fadeOut(500);
     });
 
-    $("#play").click(function () {
-        window.location.href = '/waiting'
-    });
-
     $("#about").click(function () {
         setTimeout(function () {
             $("#about-box").fadeIn(500);

@@ -7,6 +7,7 @@
     <title>p5.js example</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/p5.min.js') }}"></script>
 </head>
 
@@ -17,23 +18,13 @@
 
     <div class="content" id="pause-box">
         <button class="boton" id="resume">Resume</button>
-        <button class="boton" id="home" onclick="function () { socket.emit('disconnect'); }">Home</button>
+        <button class="boton" id="home" onclick="window.location.href='/'">Home</button>
     </div>
-    <script>
-        var socket = io();  // Reconnect to handle cleanup
 
-        window.addEventListener("beforeunload", function () {
-            socket.disconnect(); // Forcefully disconnect when leaving the page
-        });
-
-        socket.on("connect", function () {
-            console.log("Connected to game: " + socket.id);
-        });
-
-        socket.on("disconnect", function () {
-            console.log("Disconnected from server.");
-        });
-    </script>
+    <div class="waiting">
+        <h1>Waiting for another player to join</h1>
+    </div>
+    <script src="{{ url_for('static', filename='js/client.js')}}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/pieces.js') }}"></script>
     <script src="{{ url_for('static', filename='js/buttons.js') }}"></script>
