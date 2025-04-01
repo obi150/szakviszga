@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/authStyle.css') }}">
+</head>
+<body>
+    <div class="auth-container">
+        <h2 class="auth-title">Login</h2>
+        <form class="auth-form" method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.email(class="auth-input", placeholder="Email") }} <br>
+            {{ form.password(class="auth-input", placeholder="Password") }} <br>
+            <button class="auth-button" type="submit">Login</button>
+        </form>
+        <a class="auth-link" href="{{ url_for('signup') }}">Don't have an account? Sign Up</a>
+    </div>
+</body>
+</html>

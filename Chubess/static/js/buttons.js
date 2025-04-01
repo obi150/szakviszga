@@ -47,6 +47,6 @@ $(document).ready(function () {
     });
 
     $("#home").click(function () {
-        window.location.href = '/';
+        window.location.href = '/main';
     });
 });
