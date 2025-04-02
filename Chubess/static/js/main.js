@@ -3,16 +3,17 @@ let pointX, pointY, pointZ;
 let angleX = 0, angleY = 0;
 let speed = 5;
 let clickStartX, clickStartY;
+let pieceSelected = false;
 
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL);
 
-    perspective(PI / 3, width / height, 0.1, 1000);
+    perspective(PI / 3, width / height, 0.1, 1000000);
 }
 
 function draw() {
     if (gameStarted && !gameEnded) {
-        background(0); //245, 176, 65
+        background(127); //245, 176, 65
 
         angleY = constrain(angleY, -PI / 2, PI / 2);
 
@@ -43,26 +44,62 @@ function draw() {
 
         camera(camX, camY, camZ, pointX, pointY, pointZ, 0, 1, 0);
 
-        noFill();
-        stroke(0);
         for (let i = 2; i < 10; i++) {
             for (let j = 2; j < 10; j++) {
                 for (let k = 2; k < 10; k++) {
                     push();
                     translate(200 - 50 * (i - 2), 200 - 50 * (j - 2), 200 - 50 * (k - 2));
                     noFill();
+                    strokeWeight(0.5);
                     stroke(255)
                     box(50);
                     if (chessBoard3D[i][j][k] == 13) {
-                        fill(0, 0, 255);
-                        noStroke();
-                        sphere(HS);
+                        noFill();
+                        stroke(245, 176, 65);
+                        strokeWeight(6);
+                        sphere(HS, 3, 3);
                     }
 
                     pop();
                 }
             }
         }
+
+        stroke(245, 176, 65);
+        strokeWeight(5);
+
+        line(-175, -175, -174, -175, -175, -125)
+        line(-175, -174, -175, -175, -125, -175)
+        line(-174, -175, -175, -125, -175, -175)
+
+        line(-175, 224, -175, -175, 175, -175)
+        line(-174, 225, -175, -125, 225, -175)
+        line(-175, 225, -174, -175, 225, -125)
+
+        line(224, 225, -175, 175, 225, -175)
+        line(225, 224, -175, 225, 175, -175)
+        line(225, 225, -174, 225, 225, -125)
+
+        line(225, -175, -174, 225, -175, -125)
+        line(225, -174, -175, 225, -125, -175)
+        line(224, -175, -175, 175, -175, -175)
+
+        line(-175, 224, 225, -175, 175, 225)
+        line(-174, 225, 225, -125, 225, 225)
+        line(-175, 225, 224, -175, 225, 175)
+
+        line(224, 225, 225, 175, 225, 225)
+        line(225, 224, 225, 225, 175, 225)
+        line(225, 225, 224, 225, 225, 175)
+
+        line(-175, -174, 225, -175, -125, 225)
+        line(-174, -175, 225, -125, -175, 225)
+        line(-175, -175, 224, -175, -175, 175)
+
+        line(224, -175, 225, 175, -175, 225)
+        line(225, -174, 225, 225, -125, 225)
+        line(225, -175, 224, 225, -175, 175)
+        
 
         for (let i = 0; i < pieces.length; i++) {
             push();
@@ -72,7 +109,10 @@ function draw() {
             if (pieces[i].getId() < 7) {
                 noFill();
                 strokeWeight(2);
-                stroke(0);
+                if(pieceSelected && currentPieceIndex == i)
+                    stroke(245, 176, 65);
+                else
+                    stroke(0);
                 scale(5.5);
                 rotateX(PI / 2);
                 model(idToModel(pieces[i].getId()));
@@ -87,7 +127,10 @@ function draw() {
             else {
                 noFill();
                 strokeWeight(2);
-                stroke(255);
+                if(pieceSelected && currentPieceIndex == i)
+                    stroke(245, 176, 65);
+                else
+                    stroke(255);
                 scale(5.5);
                 rotateX(PI / 2);
                 model(idToModel(pieces[i].getId()));
@@ -150,23 +193,29 @@ function mouseReleased() {
                 if (pieceDistance < hitboxDistance && (!isCheck(pieces[kingIndex].getPosition()) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite)) {
                     currentPieceIndex = pieceDistanceIndex;
                     createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
+                    pieceSelected = true;
                 }
                 else {
                     createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
-                    makeMove(currentPieceIndex, hitboxDistanceIndex)
+                    makeMove(currentPieceIndex, hitboxDistanceIndex);
+                    pieceSelected = false;
                 }
             }
             else {
                 createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
-                makeMove(currentPieceIndex, hitboxDistanceIndex)
+                makeMove(currentPieceIndex, hitboxDistanceIndex);
+                pieceSelected = false;
+
             }
         }
         else if (pieceDistanceIndex > -1 && (!isCheck(pieces[kingIndex].getPosition()) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite)) {
             currentPieceIndex = pieceDistanceIndex;
             createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
+            pieceSelected = true;
         }
         else {
             deleteHitboxes();
+            pieceSelected = false;
         }
     }
 }

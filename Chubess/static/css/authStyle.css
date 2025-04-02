@@ -2,14 +2,13 @@ body, html {
     padding: 0;
     margin: 0;
     overflow: hidden;
-    background-color: #1b1b1b;
+    background-color: #7F7F7F;
 }
 
 .auth-container {
     width: 350px;
     padding: 20px;
-    background: #2c2c2c;
-    border-radius: 15px;
+    background: #000;
     box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.4), -6px -6px 12px rgba(255, 255, 255, 0.2);
     text-align: center;
     font-family: 'Montserrat', sans-serif;
@@ -40,7 +39,6 @@ body, html {
     padding: 12px;
     margin: 10px 0;
     border: none;
-    border-radius: 10px;
     background: #3d3b40;
     color: white;
     font-size: 14px;
@@ -58,7 +56,6 @@ body, html {
     padding: 12px;
     background: #f5b041;
     border: none;
-    border-radius: 10px;
     font-size: 14px;
     color: #1b1b1b;
     font-weight: bold;
