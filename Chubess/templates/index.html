@@ -4,23 +4,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>p5.js example</title>
+    <title>ChubesS | Main</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/p5.min.js') }}"></script>
 </head>
 
 <body>
-    <div class="content" id="button-container">
-        <a class="boton" id="play" href='/game'>Play</a>
-        <button class="boton" id="about">About</button>
-        <button class="boton" id="quit">Quit</button>
-    </div>
-
-    <div class="content" id="about-box">
-        <p class="styled-p">This is some information about the game or application.</p>
-        <button class="boton" id="back">Back</button>
-    </div>
+    
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/buttons.js') }}"></script>

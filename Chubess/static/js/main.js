@@ -1,7 +1,7 @@
 let camX = 25, camY = 25, camZ = -800;
 let pointX, pointY, pointZ;
 let angleX = 0, angleY = 0;
-let speed = 5;
+let speed = 5, sensitivity = 50;
 let clickStartX, clickStartY;
 let pieceSelected = false;
 
@@ -13,30 +13,38 @@ function setup() {
 
 function draw() {
     if (gameStarted && !gameEnded) {
-        background(127); //245, 176, 65
+        background(127); //245, 133, 65
 
         angleY = constrain(angleY, -PI / 2, PI / 2);
 
-        if (keyIsDown(87)) {
-            camX += sin(angleX) * speed;
-            camZ += cos(angleX) * speed;
+        if (moveCount % 2 == !isWhite)
+            document.getElementById('yourTurn').style.backgroundColor = '#f58541';
+        else
+            document.getElementById('yourTurn').style.backgroundColor = '#000000';
+
+        if (!gamePaused) {
+            if (keyIsDown(87)) {
+                camX += sin(angleX) * speed;
+                camZ += cos(angleX) * speed;
+            }
+            if (keyIsDown(83)) {
+                camX -= sin(angleX) * speed;
+                camZ -= cos(angleX) * speed;
+            }
+            if (keyIsDown(65)) {
+                camX += cos(angleX) * speed;
+                camZ -= sin(angleX) * speed;
+            }
+            if (keyIsDown(68)) {
+                camX -= cos(angleX) * speed;
+                camZ += sin(angleX) * speed;
+            }
+            if (keyIsDown(32))
+                camY -= speed;
+            if (keyIsDown(16))
+                camY += speed;
         }
-        if (keyIsDown(83)) {
-            camX -= sin(angleX) * speed;
-            camZ -= cos(angleX) * speed;
-        }
-        if (keyIsDown(65)) {
-            camX += cos(angleX) * speed;
-            camZ -= sin(angleX) * speed;
-        }
-        if (keyIsDown(68)) {
-            camX -= cos(angleX) * speed;
-            camZ += sin(angleX) * speed;
-        }
-        if (keyIsDown(32))
-            camY -= speed;
-        if (keyIsDown(16))
-            camY += speed;
+        
 
         pointX = camX + sin(angleX) * cos(angleY);
         pointY = camY + sin(angleY);
@@ -55,7 +63,7 @@ function draw() {
                     box(50);
                     if (chessBoard3D[i][j][k] == 13) {
                         noFill();
-                        stroke(245, 176, 65);
+                        stroke(245, 133, 65);
                         strokeWeight(6);
                         sphere(HS, 3, 3);
                     }
@@ -65,7 +73,7 @@ function draw() {
             }
         }
 
-        stroke(245, 176, 65);
+        stroke(245, 133, 65);
         strokeWeight(5);
 
         line(-175, -175, -174, -175, -175, -125)
@@ -110,7 +118,9 @@ function draw() {
                 noFill();
                 strokeWeight(2);
                 if(pieceSelected && currentPieceIndex == i)
-                    stroke(245, 176, 65);
+                    stroke(245, 133, 65);
+                else if (kingIndex == i && check)
+                    stroke(255, 0, 0);
                 else
                     stroke(0);
                 scale(5.5);
@@ -127,8 +137,10 @@ function draw() {
             else {
                 noFill();
                 strokeWeight(2);
-                if(pieceSelected && currentPieceIndex == i)
-                    stroke(245, 176, 65);
+                if (pieceSelected && currentPieceIndex == i)
+                    stroke(245, 133, 65);
+                else if (kingIndex == i && check)
+                    stroke(255, 0, 0);
                 else
                     stroke(255);
                 scale(5.5);
@@ -146,13 +158,24 @@ function draw() {
             pop();
         }
     }
-    else if (gameEnded)
-        console.log("Game Ended!");
+    if (promotionId != 0) {
+        createMoveOprionsHitboxesByID(pieces[currentPieceIndex].getId(), pieces[currentPieceIndex].getPosition());
+        pieces[currentPieceIndex].changeId(promotionId);
+        makePromotion(promotionId);
+        promotionId = 0;
+        promoteDiv = document.querySelector(isWhite ? '.promote-white' : '.promote-black').style.display = 'none';
+        makeMove(currentPieceIndex, currentHitboxIndex);
+        createMoveOprionsHitboxesByID(hitboxes[currentHitboxIndex].getId(), hitboxes[currentHitboxIndex].getPosition());
+        pieceSelected = false;
+        check = false;
+    }
 }
 
 function mouseDragged() {
-    angleX += (mouseX - pmouseX) * 0.01;
-    angleY += (pmouseY - mouseY) * 0.01;
+    if (!gamePaused) {
+        angleX += (mouseX - pmouseX) * 0.0002 * sensitivity;
+        angleY += (pmouseY - mouseY) * 0.0002 * sensitivity;
+    }
 }
 
 function mousePressed() {
@@ -160,7 +183,7 @@ function mousePressed() {
     clickStartY = mouseY;
 }
 function mouseReleased() {
-    if (clickStartX == mouseX && clickStartY == mouseY && gameStarted && moveCount % 2 == !isWhite) {
+    if (clickStartX == mouseX && clickStartY == mouseY && gameStarted && moveCount % 2 == !isWhite && !gameEnded && !gamePaused) {
         let vect = createRay();
         let pieceDistanceIndex = -1, pieceDistance = 999999;
         let hitboxDistanceIndex = -1, hitboxDistance = 999999;
@@ -190,32 +213,45 @@ function mouseReleased() {
         }
         if (hitboxDistanceIndex > -1) {
             if (pieceDistanceIndex > -1) {
-                if (pieceDistance < hitboxDistance && (!isCheck(pieces[kingIndex].getPosition()) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite)) {
+                if (pieceDistance < hitboxDistance && (!isCheck(pieces[kingIndex].getPosition()) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite || canTakeChecker(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition()) || canBlockCheck(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition()))) {
                     currentPieceIndex = pieceDistanceIndex;
-                    createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
+                    if ((!canTakeChecker(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition()) && !canBlockCheck(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition())) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite)
+                        pinnedHitboxes(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
                     pieceSelected = true;
+                    promotionId = 0;
+                    promoteDiv = document.querySelector(isWhite ? '.promote-white' : '.promote-black').style.display = 'none';
                 }
-                else {
+                else if (!canPromote(pieces[currentPieceIndex].getId(), hitboxes[currentHitboxIndex].getPosition())) {
+                    makeMove(currentPieceIndex, specialHitboxIndexToHitboxesIndex(pieces[currentPieceIndex].getId(), pieces[currentPieceIndex].getPosition(), hitboxDistanceIndex));
                     createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
-                    makeMove(currentPieceIndex, hitboxDistanceIndex);
                     pieceSelected = false;
+                    check = false;
                 }
+                else if(promotionId == 0)
+                    currentHitboxIndex = hitboxDistanceIndex; 
             }
-            else {
+            else if (!canPromote(pieces[currentPieceIndex].getId(), hitboxes[currentHitboxIndex].getPosition())) {
+                makeMove(currentPieceIndex, specialHitboxIndexToHitboxesIndex(pieces[currentPieceIndex].getId(), pieces[currentPieceIndex].getPosition(), hitboxDistanceIndex));
                 createMoveOprionsHitboxesByID(hitboxes[hitboxDistanceIndex].getId(), hitboxes[hitboxDistanceIndex].getPosition());
-                makeMove(currentPieceIndex, hitboxDistanceIndex);
                 pieceSelected = false;
-
+                check = false;
             }
+            else if (promotionId == 0)
+                currentHitboxIndex = hitboxDistanceIndex;
         }
-        else if (pieceDistanceIndex > -1 && (!isCheck(pieces[kingIndex].getPosition()) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite)) {
+        else if (pieceDistanceIndex > -1 && (!isCheck(pieces[kingIndex].getPosition()) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite || canTakeChecker(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition()) || canBlockCheck(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition()))) {
             currentPieceIndex = pieceDistanceIndex;
-            createMoveOprionsHitboxesByID(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
+            if ((!canTakeChecker(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition()) && !canBlockCheck(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition())) || pieces[pieceDistanceIndex].getId() == 12 - 6 * isWhite)
+                pinnedHitboxes(pieces[pieceDistanceIndex].getId(), pieces[pieceDistanceIndex].getPosition());
             pieceSelected = true;
+            promotionId = 0;
+            promoteDiv = document.querySelector(isWhite ? '.promote-white' : '.promote-black').style.display = 'none';
         }
         else {
             deleteHitboxes();
             pieceSelected = false;
+            promotionId = 0;
+            promoteDiv = document.querySelector(isWhite ? '.promote-white' : '.promote-black').style.display = 'none';
         }
     }
 }

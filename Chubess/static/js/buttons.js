@@ -1,3 +1,5 @@
+let gamePaused = false;
+
 $(document).ready(function () {
     $(".boton").each(function () {
         var $button = $(this);
@@ -10,23 +12,28 @@ $(document).ready(function () {
     });
 
     $("#about-box").hide();
-
     $("#pause-box").hide();
+    $("#settings-box").hide();
+    if (!showMoves)
+        $(".pause").hide();
+    $(".home-content").hide();
+    $("#yourTurn").hide();
 
     $(".boton").click(function () {
-        $("#button-container .boton").fadeOut(500);
-        $("#button-pause .boton").fadeOut(500);
+        $("#button-container").fadeOut(200);
+        $("#button-pause").fadeOut(200);
+        $("#settings-box").fadeOut(200);
     });
 
     $("#about").click(function () {
         setTimeout(function () {
-            $("#about-box").fadeIn(500);
-        }, 500);
+            $("#about-box").fadeIn(200);
+        }, 200);
     });
 
     $("#back").click(function () {
-        $("#about-box").fadeOut(500, function () {
-            $("#button-container .boton").fadeIn(500);
+        $("#about-box").fadeOut(200, function () {
+            $("#button-container").fadeIn(200);
         });
     });
 
@@ -36,17 +43,32 @@ $(document).ready(function () {
 
     $("#pause").click(function () {
         setTimeout(function () {
-            $("#pause-box").fadeIn(500);
-        }, 500);
+            $("#pause-box").fadeIn(200);
+        }, 200);
+        gamePaused = true;
     });
 
     $("#resume").click(function () {
-        $("#pause-box").fadeOut(500, function () {
-            $("#button-pause .boton").fadeIn(500);
+        $("#pause-box").fadeOut(200, function () {
+            $("#button-pause").fadeIn(200);
         });
+        gamePaused = false;
+    });
+
+    $("#settings").click(function () {
+        setTimeout(function () {
+            $("#settings-box").fadeIn(200);
+            $("#pause-box").fadeOut(200);
+        }, 200);
     });
 
     $("#home").click(function () {
         window.location.href = '/main';
+    });
+
+    $("#ok").click(function () {
+        setTimeout(function () {
+            $("#pause-box").fadeIn(200);
+        }, 200);
     });
 });

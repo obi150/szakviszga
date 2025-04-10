@@ -1,6 +1,10 @@
 let chessBoard3D = new Array;
 let HS = 10;
 let pawnModel, knightModel, bishopModel, rookModel, queenModel, kingModel;
+let chessmap;
+let capturedList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+let promotionId = 0; ///piece id
+let currentHitboxIndex = 0;
 
 function preload() {
     pawnModel = loadModel('/static/models/pawn.obj');
@@ -33,6 +37,9 @@ class hitbox {
     }
     changeId(id) {
         this.#id = id;
+    }
+    changeOldId(id) {
+        this.#oldId = id;
     }
     getPosition() {
         return this.#position;
@@ -71,14 +78,17 @@ class hitbox {
  * black_king:  12
  * hitbox:      13*/
 
-setUpChessBoard();
-let pieces = [new hitbox(25, [9, 9, 9], 6), new hitbox(25, [9, 2, 9], 12), new hitbox(25, [4, 4, 3], 4), new hitbox(25, [9, 3, 2], 4),
-    new hitbox(25, [9, 3, 3], 4), new hitbox(25, [9, 2, 3], 4)];
+let pieces = [];
 let hitboxes = [];
 
-kingIndex = findKingIndex();
-
 let currentPieceIndex = 0;
+
+function update_taken_list(id) {
+    capturedList[id] += 1;
+
+    const item = document.getElementById(`${id}`);
+    item.querySelector('span').textContent = `${capturedList[id]}`;
+}
 
 function idToModel(id) {
     switch (id) {
@@ -171,7 +181,19 @@ function setUpChessBoard() {
                 if (i < 2 || j < 2 || k < 2 || i > 9 || j > 9 || k > 9)
                     chessBoard3D[i][j][k] = -1;
                 else
-                    chessBoard3D[i][j][k] = 0;
+                    chessBoard3D[i][j][k] = chessmap[i - 2][j - 2][k - 2];
+        }
+    }
+}
+
+function setUpPieces() {
+    for (let i = 2; i < 10; i++) {
+        for (let j = 2; j < 10; j++) {
+            for (let k = 2; k < 10; k++) {
+                if (chessBoard3D[i][j][k] != 0)
+                    pieces.push(new hitbox(HS, [i, j, k], chessBoard3D[i][j][k]));
+                    
+            }
         }
     }
 }
@@ -184,9 +206,21 @@ function findKingIndex(white = isWhite) {
     return -1;
 }
 
+function findOppositeKingIndex(white = isWhite) {
+    for (let i = 0; i < pieces.length; i++) {
+        if (pieces[i].getId() == 12 - 6 * !white)
+            return i;
+    }
+    return -1;
+}
+
 function move(pieceId, hitboxId) {
     currentPieceIndex = pieceId
     createMoveOprionsHitboxesByID(pieces[pieceId].getId(), pieces[pieceId].getPosition())
+    if (promotionId != 0) {
+        pieces[currentPieceIndex].changeId(promotionId);
+        promotionId = 0;
+    }
     createMoveOprionsHitboxesByID(hitboxes[hitboxId].getId(), hitboxes[hitboxId].getPosition())
 }
 
@@ -241,35 +275,173 @@ function take(pos) {
         }
     }
     if (pieceIndex != -1) {
+        update_taken_list(pieces[pieceIndex].getId());
         pieces[pieceIndex].destroy();
         pieces.splice(pieceIndex, 1);
         if (pieceIndex < currentPieceIndex)
             currentPieceIndex--;
         if (pieceIndex < kingIndex)
             kingIndex--;
+        if (pieceIndex < oppositeKingIndex)
+            oppositeKingIndex--;
     }
 }
 
-function allTakeHitboxes(white) {
+function canPromote(id, pos) {
+    if (id == 1 && pos[0] + pos[1] + pos[2] >= 22 && (pos[0] == 9 || pos[1] == 9 || pos[2] == 9)) {
+        makeVisiblePromotion(pieces[currentPieceIndex].isWhite());
+        return true;
+    }
+    else if (id == 7 && pos[0] + pos[1] + pos[2] <= 11 && (pos[0] == 2 || pos[1] == 2 || pos[2] == 2)) {
+        makeVisiblePromotion(pieces[currentPieceIndex].isWhite());
+        return true; 
+    }
+    return false;
+}
+
+function canTakeChecker(id, pos) {
     deleteHitboxes();
+    let white;
+    if (id < 7)
+        white = true;
+    else
+        white = false;
+    let index;
+    if (white == isWhite)
+        index = kingIndex;
+    else
+        index = oppositeKingIndex;
+    let checkersIndexes = findChecker(white, pieces[index].getPosition());
+    if (checkersIndexes.length < 2 && checkersIndexes.length > 0) {
+        let checkerPos = pieces[checkersIndexes[0]].getPosition();
+        pinnedHitboxes(id, pos);
+        if (chessBoard3D[checkerPos[0]][checkerPos[1]][checkerPos[2]] == 13) {
+            deleteHitboxes();
+            hitboxes.push(new hitbox(HS, checkerPos, 13,
+                chessBoard3D[checkerPos[0]][checkerPos[1]][checkerPos[2]]));
+            return true;
+        }
+        deleteHitboxes();
+    }
+    return false;
+}
+
+function canBlockCheck(id, pos) {
+    deleteHitboxes();
+    let white;
+    if (id < 7)
+        white = true;
+    else
+        white = false;
+    let index;
+    if (white == isWhite)
+        index = kingIndex;
+    else
+        index = oppositeKingIndex;
+    let checkersIndexes = findChecker(white, pieces[index].getPosition());
+    if (checkersIndexes.length < 2 && checkersIndexes.length > 0) {
+        let newHitboxes = [];
+        pinnedHitboxes(id, pos);
+        for (let i = 0; i < hitboxes.length; i++) {
+            let hpos = hitboxes[i].getPosition();
+            let oldId = hitboxes[i].getOldId();
+            hitboxes[i].changeOldId(id)
+            chessBoard3D[hpos[0]][hpos[1]][hpos[2]] = id;
+            if (!isCheck(pieces[index].getPosition(), white))
+                newHitboxes.push(hitboxes[i]);
+            hitboxes[i].changeOldId(oldId)
+            chessBoard3D[hpos[0]][hpos[1]][hpos[2]] = 13;
+        }
+        deleteHitboxes();
+        if (newHitboxes.length > 0) {
+            hitboxes = newHitboxes;
+            buildHitboxes();
+            return true;
+        }
+    }
+    return false;
+}
+
+function pinnedHitboxes(id, pos) {
+    deleteHitboxes();
+    let white;
+    if (id < 7)
+        white = true;
+    else
+        white = false;
+    let index;
+    if (white == isWhite)
+        index = kingIndex;
+    else
+        index = oppositeKingIndex;
+    let newHitboxes = [];
+    let checkerIndex = -1;
+    createMoveOprionsHitboxesByID(id, pos);
+    for (let i = 0; i < hitboxes.length; i++) {
+        let hpos = hitboxes[i].getPosition();
+        let oldId = hitboxes[i].getOldId();
+        hitboxes[i].changeOldId(id)
+        chessBoard3D[hpos[0]][hpos[1]][hpos[2]] = id;
+        chessBoard3D[pos[0]][pos[1]][pos[2]] = 0;
+        if (!isCheck(pieces[index].getPosition(), white))
+            newHitboxes.push(hitboxes[i]);
+        else if (checkerIndex == -1) {
+            checkerIndex = findChecker(white, pieces[index].getPosition())[0];
+            if (positionsEqual(hpos, pieces[checkerIndex].getPosition()))
+                newHitboxes.push(hitboxes[i]);
+        }
+        else if (positionsEqual(hpos, pieces[checkerIndex].getPosition()))
+            newHitboxes.push(hitboxes[i]);
+        hitboxes[i].changeOldId(oldId);
+        chessBoard3D[hpos[0]][hpos[1]][hpos[2]] = 13;
+        chessBoard3D[pos[0]][pos[1]][pos[2]] = id;
+    }
+    deleteHitboxes();
+    hitboxes = newHitboxes;
+    buildHitboxes();
+}
+
+function positionsEqual(pos1, pos2) {
+    return pos1.length === pos2.length && pos1.every((val, i) => val === pos2[i]);
+}
+
+function specialHitboxIndexToHitboxesIndex(id, pos, index) {
+    let saveHitboxes = hitboxes;
+    deleteHitboxes();
+    createMoveOprionsHitboxesByID(id, pos);
+    let i = hitboxes.findIndex(x => positionsEqual(x.getPosition(), saveHitboxes[index].getPosition()));
+    deleteHitboxes();
+    hitboxes = saveHitboxes;
+    return i;
+}
+
+function makeVisiblePromotion(white) {
+    if (white == isWhite)
+        document.querySelector(white ? '.promote-white' : '.promote-black').style.display = 'flex';
+}
+
+function allTakeHitboxes(white, pos) {
+    deleteHitboxes();
+    let thisId = chessBoard3D[pos[0]][pos[1]][pos[2]];
+    chessBoard3D[pos[0]][pos[1]][pos[2]] = 0;
     for (let i = 0; i < pieces.length; i++) {
         let indexId = pieces[i].getId();
-        if (indexId > (6 * white) && indexId < (7 + 6 * white)) {
+        if (pieces[i].isWhite() != white) {
             switch (indexId) {
                 case 1 + 6 * white:
-                    pawnTake(1 - white, pieces[i].getPosition());
+                    pawnTake(!white, pieces[i].getPosition(), true);
                     break;
                 case 2 + 6 * white:
-                    moveKnight(1 - white, pieces[i].getPosition());
+                    moveKnight(white, pieces[i].getPosition());
                     break;
                 case 3 + 6 * white:
-                    moveBishop(1 - white, pieces[i].getPosition());
+                    moveBishop(white, pieces[i].getPosition());
                     break;
                 case 4 + 6 * white:
-                    moveRook(1 - white, pieces[i].getPosition());
+                    moveRook(white, pieces[i].getPosition());
                     break;
                 case 5 + 6 * white:
-                    moveBishop(1 - white, pieces[i].getPosition());
+                    moveBishop(white, pieces[i].getPosition());
                     moveRook(1 - white, pieces[i].getPosition());
                     break;
                 case 6 + 6 * white:
@@ -278,11 +450,26 @@ function allTakeHitboxes(white) {
             }
         }
     }
+    if (chessBoard3D[pos[0]][pos[1]][pos[2]] == 13) {
+        chessBoard3D[pos[0]][pos[1]][pos[2]] = thisId;
+        return true;
+    }
+    chessBoard3D[pos[0]][pos[1]][pos[2]] = thisId;
+    return false;
 }
 
-function killAllHitboxes() {
-    for (let i = 0; i < pieces.length; i++)
+function killAllHitboxes(pos) {
+    let thisId = chessBoard3D[pos[0]][pos[1]][pos[2]];
+    for (let i = pieces.length - 1; i >= 0; i--)
         deleteHitboxes();
+    chessBoard3D[pos[0]][pos[1]][pos[2]] = thisId;
+}
+
+function buildHitboxes() {
+    for (let i = 0; i < hitboxes.length; i++) {
+        let pos = hitboxes[i].getPosition();
+        chessBoard3D[pos[0]][pos[1]][pos[2]] = 13;
+    }
 }
 
 function isTakeable(pos) {
@@ -302,14 +489,14 @@ function movePawn(white, pos) {
             chessBoard3D[pos[0] - 1 + 2 * white][pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white]));
 }
 
-function pawnTake(white, pos) {
-    if (chessBoard3D[pos[0] - 1 + 2 * white][pos[1] - 1 + 2 * white][pos[2]] < (7 + 6 * white) && chessBoard3D[pos[0] - 1 + 2 * white][pos[1] - 1 + 2 * white][pos[2]] > (0 + 6 * white))
+function pawnTake(white, pos, checkCheck = false) {
+    if ((chessBoard3D[pos[0] - 1 + 2 * white][pos[1] - 1 + 2 * white][pos[2]] < (7 + 6 * white) && chessBoard3D[pos[0] - 1 + 2 * white][pos[1] - 1 + 2 * white][pos[2]] > (0 + 6 * white)) || checkCheck)
         hitboxes.push(new hitbox(HS, [pos[0] - 1 + 2 * white, pos[1] - 1 + 2 * white, pos[2]], 13,
             chessBoard3D[pos[0] - 1 + 2 * white][pos[1] - 1 + 2 * white][pos[2]]));
-    if (chessBoard3D[pos[0] - 1 + 2 * white][pos[1]][pos[2] - 1 + 2 * white] < (7 + 6 * white) && chessBoard3D[pos[0] - 1 + 2 * white][pos[1]][pos[2] - 1 + 2 * white] > (0 + 6 * white))
+    if ((chessBoard3D[pos[0] - 1 + 2 * white][pos[1]][pos[2] - 1 + 2 * white] < (7 + 6 * white) && chessBoard3D[pos[0] - 1 + 2 * white][pos[1]][pos[2] - 1 + 2 * white] > (0 + 6 * white)) || checkCheck)
         hitboxes.push(new hitbox(HS, [pos[0] - 1 + 2 * white, pos[1], pos[2] - 1 + 2 * white], 13,
             chessBoard3D[pos[0] - 1 + 2 * white][pos[1]][pos[2] - 1 + 2 * white]));
-    if (chessBoard3D[pos[0]][pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white] < (7 + 6 * white) && chessBoard3D[pos[0]][pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white] > (0 + 6 * white))
+    if ((chessBoard3D[pos[0]][pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white] < (7 + 6 * white) && chessBoard3D[pos[0]][pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white] > (0 + 6 * white)) || checkCheck)
         hitboxes.push(new hitbox(HS, [pos[0], pos[1] - 1 + 2 * white, pos[2] - 1 + 2 * white], 13,
             chessBoard3D[pos[0]][pos[1] - 1 + 2 * white][pos[2] - 1 + 2 * white]));
 }
@@ -499,7 +686,7 @@ function moveRook(white, pos) {
 
 function moveKing(white, pos) {
     let newHitboxes = [];
-    allTakeHitboxes(white);
+    allTakeHitboxes(white, pos);
     for (let i = -1; i < 2; i++)
         for (let j = -1; j < 2; j++)
             for (let k = -1; k < 2; k++) {
@@ -507,8 +694,9 @@ function moveKing(white, pos) {
                     (chessBoard3D[pos[0] + i][pos[1] + j][pos[2] + k] > (6 * white) && chessBoard3D[pos[0] + i][pos[1] + j][pos[2] + k] < (7 + 6 * white))))
                     newHitboxes.push(new hitbox(HS, [pos[0] + i, pos[1] + j, pos[2] + k], 13, chessBoard3D[pos[0] + i][pos[1] + j][pos[2] + k]));
             }
-    killAllHitboxes();
+    killAllHitboxes(pos);
     hitboxes = newHitboxes;
+    buildHitboxes();
 }
 
 function noRestrictionKingMove(pos) {
@@ -519,23 +707,110 @@ function noRestrictionKingMove(pos) {
 }
 
 function isCheck(pos, white = isWhite) {
+    let saveHitboxes = hitboxes;
     if (chessBoard3D[pos[0]][pos[1]][pos[2]] == 12 - 6 * white) {
-        allTakeHitboxes(white);
-        if (isTakeable(pos)) {
-            killAllHitboxes();
+        if (allTakeHitboxes(white, pos)) {
+            killAllHitboxes(pos);
+            hitboxes = saveHitboxes;
+            buildHitboxes();
             return true;
         }
-        killAllHitboxes();
+        killAllHitboxes(pos);
     }
+    hitboxes = saveHitboxes;
+    buildHitboxes();
     return false;
+}
+
+function findChecker(white, pos) {
+    let checkersIndexes = [];
+    let saveHitboxes = hitboxes;
+    deleteHitboxes();
+    for (let i = 0; i < pieces.length; i++) {
+        if (pieces[i].isWhite() != white) {
+            createMoveOprionsHitboxesByID(pieces[i].getId(), pieces[i].getPosition());
+            if (chessBoard3D[pos[0]][pos[1]][pos[2]] == 13) {
+                checkersIndexes.push(i);
+            }
+            deleteHitboxes();
+        }
+    }
+    hitboxes = saveHitboxes;
+    buildHitboxes();
+    return checkersIndexes;
 }
 
 function isCheckmate(pos, white = isWhite) {
     if (isCheck(pos, white) && chessBoard3D[pos[0]][pos[1]][pos[2]] == 12 - 6 * white) {
         moveKing(white, pos);
-        if (hitboxes.lenght == 0)
-            return true;
-        killAllHitboxes();
+        if (hitboxes.length == 0) {
+            let calcTakers = 0;
+            for (let i = 0; i < pieces.length; i++) {
+                if (pieces[i].isWhite() == white)
+                    calcTakers += (canTakeChecker(pieces[i].getId(), pieces[i].getPosition()) + canBlockCheck(pieces[i].getId(), pieces[i].getPosition()));
+            }
+            deleteHitboxes();
+            if (calcTakers == 0)
+                return true;
+        }
+        deleteHitboxes()
     }
     return false;
+}
+
+function isStealmate(white = isWhite) {
+    if (pieces.length == 2)
+        return true;
+    else {
+        let stealmate = true;
+        for (let i = 0; i < pieces.length; i++) {
+            if (pieces[i].isWhite() == white) {
+                let id = pieces[i].getId();
+                switch (id) {
+                    case 7 - 6 * white:
+                        pawnTake(white, pieces[i].getPosition());
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        movePawn(white, pieces[i].getPosition())
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        break;
+                    case 8 - 6 * white:
+                        moveKnight(white, pieces[i].getPosition());
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        break;
+                    case 9 - 6 * white:
+                        moveBishop(white, pieces[i].getPosition());
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        break;
+                    case 10 - 6 * white:
+                        moveRook(white, pieces[i].getPosition());
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        break;
+                    case 11 - 6 * white:
+                        moveBishop(white, pieces[i].getPosition());
+                        moveRook(1 - white, pieces[i].getPosition());
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        break;
+                    case 12 - 6 * white:
+                        moveKing(white, pieces[i].getPosition());
+                        if (hitboxes.length > 0)
+                            stealmate = false;
+                        deleteHitboxes();
+                        break;
+                }
+            }
+        }
+        return stealmate;
+    }
 }

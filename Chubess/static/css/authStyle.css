@@ -54,7 +54,7 @@ body, html {
 .auth-button {
     width: 100%;
     padding: 12px;
-    background: #f5b041;
+    background: #f58541;
     border: none;
     font-size: 14px;
     color: #1b1b1b;
@@ -71,7 +71,7 @@ body, html {
 .auth-link {
     margin-top: 10px;
     display: block;
-    color: #f5b041;
+    color: #f58541;
     text-decoration: none;
     font-size: 12px;
 }

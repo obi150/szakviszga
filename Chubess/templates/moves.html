@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChubesS | Game</title>
+    <title>ChubesS | Moves</title>
     <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -17,28 +17,13 @@
         <button class="boton" id="pause">Pause</button>
     </div>
 
-    <div id="taken-pieces">
-        <div class="taken-side" id="white-taken-list">
-            <strong>White's Captured:</strong>
-            <div class="taken-list">
-                <div class="taken-item" id="1"><img src="{{ url_for('static', filename='img/white_pawn.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="2"><img src="{{ url_for('static', filename='img/white_knight.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="3"><img src="{{ url_for('static', filename='img/white_bishop.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="4"><img src="{{ url_for('static', filename='img/white_rook.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="5"><img src="{{ url_for('static', filename='img/white_queen.png') }}">x<span>0</span></div>
-            </div>
-        </div>
-
-        <div class="taken-side" id="black-taken-list">
-            <strong>Black's Captured:</strong>
-            <div class="taken-list">
-                <div class="taken-item" id="7"><img src="{{ url_for('static', filename='img/black_pawn.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="8"><img src="{{ url_for('static', filename='img/black_knight.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="9"><img src="{{ url_for('static', filename='img/black_bishop.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="10"><img src="{{ url_for('static', filename='img/black_rook.png') }}">x<span>0</span></div>
-                <div class="taken-item" id="11"><img src="{{ url_for('static', filename='img/black_queen.png') }}">x<span>0</span></div>
-            </div>
-        </div>
+    <div class="pieces">
+        <button onclick="choosePiece(1)"><img src="{{ url_for('static', filename='img/white_pawn.png') }}"></button>
+        <button onclick="choosePiece(2)"><img src="{{ url_for('static', filename='img/white_knight.png') }}"></button>
+        <button onclick="choosePiece(3)"><img src="{{ url_for('static', filename='img/white_bishop.png') }}"></button>
+        <button onclick="choosePiece(4)"><img src="{{ url_for('static', filename='img/white_rook.png') }}"></button>
+        <button onclick="choosePiece(5)"><img src="{{ url_for('static', filename='img/white_queen.png') }}"></button>
+        <button onclick="choosePiece(6)"><img src="{{ url_for('static', filename='img/white_king.png') }}"></button>
     </div>
 
     <div class="promote-white">
@@ -53,10 +38,6 @@
         <button id="9" onclick="promotionId=9"><img src="{{ url_for('static', filename='img/black_bishop.png') }}"></button>
         <button id="10" onclick="promotionId=10"><img src="{{ url_for('static', filename='img/black_rook.png') }}"></button>
         <button id="11" onclick="promotionId=11"><img src="{{ url_for('static', filename='img/black_queen.png') }}"></button>
-    </div>
-
-    <div id="yourTurn">
-        <p class="yourTurn-text">Your Turn</p>
     </div>
 
     <div class="content" id="pause-box">
@@ -85,43 +66,15 @@
         <button class="boton" id="ok" onclick="sendValues()">Ok</button>
     </div>
 
-    <div class="waiting">
-        <img src="{{ url_for('static', filename='img/waiting.gif') }}" />
-    </div>
-
-    <div class="lost-container" id="lostDiv" style="display: none;">
-        <div class="lost-title">
-            <img src="{{ url_for('static', filename='img/youlost.png') }}" />
-        </div>
-        <p>Better luck next time!</p>
-    </div>
-
-    <div class="won-container" id="wonDiv" style="display: none;">
-        <div class="won-title">
-            <img src="{{ url_for('static', filename='img/youwon.png') }}" />
-        </div>
-        <p>Congratulations!</p>
-    </div>
-
-    <div class="draw-container" id="drawDiv" style="display: none;">
-        <div class="draw-title">
-            <img src="{{ url_for('static', filename='img/draw.png') }}" />
-        </div>
-        <p>It's a draw!</p>
-    </div>
-
-    <div class="home-content">
-        <button class="boton" id="home" onclick="window.location.href='/main'">Home</button>
-    </div>
-
     <script src="{{ url_for('static', filename='js/pieces.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/load.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/client.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/choosePiece.js') }}"></script>
     <script>
-        let showMoves = false;
+        let showMoves = true;
+        choosePiece(1);
+        let isWhite = true;
     </script>
     <script src="{{ url_for('static', filename='js/buttons.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/moves.js') }}"></script>
     <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 </body>
 

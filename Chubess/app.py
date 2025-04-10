@@ -55,7 +55,12 @@ def login():
 @app.route('/game')
 @login_required
 def waiting_room():
-    return render_template('game.html') 
+    return render_template('game.html')
+
+@app.route('/moves')
+@login_required
+def moves_room():
+    return render_template('moves.html') 
 
 @socketio.on('join_game')
 def handle_join():
@@ -85,6 +90,51 @@ def piece_move(data):
 
     emit('receive_move', {"piece": piece, "hitbox": hitbox}, room=players[index - 2 * (index % 2) + 1])
 
+@socketio.on('promote')
+def piece_promote(data):
+   player_id = request.sid
+
+   promoteId = data
+   index = players.index(player_id)
+   emit('receive_promotion', promoteId, room=players[index - 2 * (index % 2) + 1])
+
+
+@socketio.on('lost')
+def game_end():
+    player_id = request.sid
+    print("Game Ended!")
+
+    if player_id in players:
+        index = players.index(player_id)
+
+        emit('won', room=players[index - 2 * (index % 2) + 1])
+        if index < index - 2 * (index % 2) + 1:
+            players.pop(index)
+            players.pop(index)
+        else:
+            players.pop(index - 2 * (index % 2) + 1)
+            players.pop(index - 2 * (index % 2) + 1)
+
+        update_player_list();
+
+@socketio.on('draw')
+def game_end():
+    player_id = request.sid
+    print("Game Ended!")
+
+    if player_id in players:
+        index = players.index(player_id)
+
+        emit('draw', room=players[index - 2 * (index % 2) + 1])
+        if index < index - 2 * (index % 2) + 1:
+            players.pop(index)
+            players.pop(index)
+        else:
+            players.pop(index - 2 * (index % 2) + 1)
+            players.pop(index - 2 * (index % 2) + 1)
+
+        update_player_list();    
+
 @socketio.on('disconnect')
 def handle_disconnect():
     player_id = request.sid
@@ -93,7 +143,7 @@ def handle_disconnect():
         index = players.index(player_id)
         if len(players) > index - 2 * (index % 2) + 1:
             print("Players: ", player_id, " and ", players[index - 2 * (index % 2) + 1], " removed")
-            emit('result',{"result" : "win"} ,room=players[index - 2 * (index % 2) + 1])
+            emit('won' ,room=players[index - 2 * (index % 2) + 1])
             if index < index - 2 * (index % 2) + 1:
                 players.pop(index)
                 players.pop(index)
@@ -115,4 +165,4 @@ def update_player_list():
     emit('update_players', {"players" : players}, broadcast=True)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
