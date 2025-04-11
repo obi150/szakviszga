@@ -12,8 +12,40 @@
 </head>
 
 <body>
-    
+    <div class="logo-container">
+        <img src="{{ url_for('static', filename='img/logo.png') }}">
+    </div>
 
+    <div class="content" id="button-container">
+        <a class="boton" href="/game">Play</a>
+        <button class="boton" id="about">About</button>
+        <a class="boton" href="/moves">Moves</a>
+        <button class="boton" id="quit">Quit</button>
+    </div>
+
+    <div class="content" id="about-box">
+        <div class="about-text">
+            <h1>About the Game</h1>
+            <h2>Welcome to 3D Chess – The Next Dimension of Strategy</h2>
+            <p>
+                Step into a new era of chess with our 3D Chess experience — a full 8x8x8 board that challenges your mind in ways traditional chess never could. This isn’t just a twist on a classic; it’s an evolution.
+            </p>
+            <p>
+                Visualizing the game is harder. The pieces move through layers, across planes, and in directions you never had to consider before. Strategy becomes multi-dimensional, literally. Every decision you make echoes across the board's height, depth, and width.
+            </p>
+            <p>
+                Whether you're a seasoned chess player looking for a new challenge or a strategist eager to master a more complex battlefield, this game will push your spatial reasoning, foresight, and creativity to their limits.
+            </p>
+            <p>
+                It’s not just about thinking ahead — it’s about thinking above, below, and beyond.
+            </p>
+        </div>
+        <button class="boton" id="back">Back</button>
+    </div>
+
+    <script>
+        let showMoves = false;
+    </script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/buttons.js') }}"></script>
 </body>
