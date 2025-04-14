@@ -1,4 +1,4 @@
-fetch('static/chessmap/basic.chessmap')
+fetch('static/chessmap/checker.chessmap')
     .then(response => response.text())
     .then(text => {
         const lines = text.split(/\r?\n/);

@@ -23,25 +23,25 @@ function draw() {
             document.getElementById('yourTurn').style.backgroundColor = '#000000';
 
         if (!gamePaused) {
-            if (keyIsDown(87)) {
+            if (keyIsDown(87)) { //W
                 camX += sin(angleX) * speed;
                 camZ += cos(angleX) * speed;
             }
-            if (keyIsDown(83)) {
+            if (keyIsDown(83)) { //S
                 camX -= sin(angleX) * speed;
                 camZ -= cos(angleX) * speed;
             }
-            if (keyIsDown(65)) {
+            if (keyIsDown(65)) { //A
                 camX += cos(angleX) * speed;
                 camZ -= sin(angleX) * speed;
             }
-            if (keyIsDown(68)) {
+            if (keyIsDown(68)) { //D
                 camX -= cos(angleX) * speed;
                 camZ += sin(angleX) * speed;
             }
-            if (keyIsDown(32))
+            if (keyIsDown(32)) //space
                 camY -= speed;
-            if (keyIsDown(16))
+            if (keyIsDown(16)) //shift
                 camY += speed;
         }
         

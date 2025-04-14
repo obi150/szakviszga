@@ -3,7 +3,6 @@ const slider2 = document.getElementById("sens");
 const slider1Value = document.getElementById("speedValue");
 const slider2Value = document.getElementById("sensValue");
 
-// Update the value text next to the slider when the user slides it
 slider1.addEventListener("input", function () {
     slider1Value.textContent = slider1.value;
 });

@@ -57,7 +57,7 @@ socket.on("receive_move", (data) => {
         document.querySelector('.home-content').style.display = 'block';
         socket.emit("lost");
     }
-    if (stealmate) {
+    else if (stealmate) {
         document.getElementById("drawDiv").style.display = "block";
         document.querySelector('.pause').style.display = 'none';
         document.querySelector('.home-content').style.display = 'block';

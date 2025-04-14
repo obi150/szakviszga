@@ -656,8 +656,8 @@ function moveRook(white, pos) {
     i = 1;
     for (i; !chessBoard3D[pos[0] - i][pos[1]][pos[2]] || chessBoard3D[pos[0] - i][pos[1]][pos[2]] == 13; i++)
         hitboxes.push(new hitbox(HS, [pos[0] - i, pos[1], pos[2]], 13))
-    if (chessBoard3D[pos[0] - i][pos[1]][pos[2]] > (6 * white) && chessBoard3D[pos[0] - 1][pos[1]][pos[2]] < (7 + 6 * white))
-        hitboxes.push(new hitbox(HS, [pos[0] - 1, pos[1], pos[2]], 13, chessBoard3D[pos[0] - 1][pos[1]][pos[2]]))
+    if (chessBoard3D[pos[0] - i][pos[1]][pos[2]] > (6 * white) && chessBoard3D[pos[0] - i][pos[1]][pos[2]] < (7 + 6 * white))
+        hitboxes.push(new hitbox(HS, [pos[0] - i, pos[1], pos[2]], 13, chessBoard3D[pos[0] - i][pos[1]][pos[2]]))
 
     i = 1;
     for (i; !chessBoard3D[pos[0]][pos[1] + i][pos[2]] || chessBoard3D[pos[0]][pos[1] + i][pos[2]] == 13; i++)
